@@ -23,28 +23,11 @@
  */
 package bingopos;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-
 /**
  *
  * @author Switcher
  */
-public class dbConnect {
-    
-    static private Connection connection;
-    public static Connection getConnection() throws Exception{
-        if(connection ==null){
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://192.168.1.2/bingo", "bingo", "ECET392L");
-        }
-        return connection;
-    }
-    public static Connection setConnection(String url, String user, String pass) throws Exception{
-        if(connection==null){
-            Class.forName("com.mysql.jdbc.Driver");
-                    connection = DriverManager.getConnection(url, user, pass);
-        }
-        return connection;
-    }
+public interface Product {
+    public String getProduct();
+    public String setProduct();
 }
