@@ -21,30 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package bingopos;
+package Common;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.io.Serializable;
 
 /**
  *
  * @author Switcher
  */
-public class dbConnect {
+public class Order implements Serializable{
+    public static final long serialVersionUID = 1L;
+    final static int SELL = 1;
+    final static int DELETE = 2;
+    final static int SUCESS = 3;
     
-    static private Connection connection;
-    public static Connection getConnection() throws Exception{
-        if(connection ==null){
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://192.168.1.2/bingo", "switcher", "duJU92Ca");
-        }
-        return connection;
-    }
-    public static Connection setConnection(String url, String user, String pass) throws Exception{
-        if(connection==null){
-            Class.forName("com.mysql.jdbc.Driver");
-                    connection = DriverManager.getConnection(url, user, pass);
-        }
-        return connection;
-    }
+    public int type;
+    public String result;
+    public int idproduct;
+    public String name;
+    public double price;
+    public int qty;
+    
+    
 }

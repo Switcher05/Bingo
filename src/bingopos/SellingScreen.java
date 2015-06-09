@@ -23,19 +23,123 @@
  */
 package bingopos;
 
+import Common.BingoPOSInterface;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.util.Date;
+import javax.swing.Timer;
+
 /**
  *
  * @author Switcher
  */
 public class SellingScreen extends javax.swing.JFrame {
-
+    Connection c;
+    Statement stmt;
+    ResultSet rs;
+    PreparedStatement pstmt;
+    public static String date;
+    private static final long serialVersionUID = 1L;
+    private static boolean activeInv = false;
+    private int RMIPort = 12345;
+    private String hostname = "localhost";
+    private String registryURL = "rmi://"+ hostname + ":" + RMIPort + "/pos";
+    public static final int userID = 1;
+    public int invNum = 0;
     /**
      * Creates new form SellingScreen
      */
     public SellingScreen() {
+        
         initComponents();
-    }
+        loadButtons();
+        
+        Timer timer = new Timer(500, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    tickTock();
+                }
+            });
+        timer.setRepeats(true);
+        timer.setCoalesce(true);
+        timer.setInitialDelay(0);
+        timer.start();
+        if(activeInv == false){
+            try{
+                BingoPOSInterface pos =(BingoPOSInterface)Naming.lookup(registryURL);
+                System.out.println("Lookup complete");
+                invNum = pos.createInvoice(userID);
+                System.out.println("invoice num:" + invNum);
+            }catch (Exception ex) {
+                System.out.println("Error getting invoice number:" + ex);
+            }
+        }
+            
+        }
 
+    public void actionPerformed(ActionEvent e){
+        String choice = e.getActionCommand();
+        if (choice == "1 Face Paper")
+        {
+            System.out.println("Test");
+        }
+    }    
+    public void tickTock() {
+            clock.setText(DateFormat.getDateTimeInstance().format(new Date()));
+        }
+
+    public void loadButtons(){
+        try{
+            c = dbConnect.getConnection();
+            stmt = c.createStatement();
+            
+            String sql1 = "SELECT * FROM product WHERE idproduct = 1";
+            rs = stmt.executeQuery(sql1);
+            while(rs.next()){
+                String button1 = rs.getString("name");
+                String button1prize = rs.getString("price");
+                btnProduct1.setText(button1 + button1prize);
+            }
+            String sql2 = "SELECT * FROM product WHERE idproduct = 2";
+            rs = stmt.executeQuery(sql2);
+            while(rs.next()){
+                String button2 = rs.getString("name");
+                String button2prize = rs.getString("price");
+                btnProduct2.setText(button2 + button2prize);
+            }
+            String sql3 = "SELECT * FROM product WHERE idproduct = 3";
+            rs = stmt.executeQuery(sql3);
+            while(rs.next()){
+                String button3 = rs.getString("name");
+                String button3prize = rs.getString("price");
+                btnProduct3.setText(button3 + button3prize);
+            }
+            String sql4 = "SELECT * FROM product WHERE idproduct = 4";
+            rs = stmt.executeQuery(sql4);
+            while(rs.next()){
+                String button4 = rs.getString("name");
+                String button4prize = rs.getString("price");
+                btnProduct4.setText(button4 + button4prize);
+            }
+            String sql5 = "SELECT * FROM product WHERE idproduct = 5";
+            rs = stmt.executeQuery(sql5);
+            while(rs.next()){
+                String button5 = rs.getString("name");
+                String button5prize = rs.getString("price");
+                btnProduct5.setText(button5 + button5prize);
+            }
+            
+            
+            
+        }catch (Exception e) { e.printStackTrace(); }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -52,7 +156,7 @@ public class SellingScreen extends javax.swing.JFrame {
         jButton39 = new javax.swing.JButton();
         lblUser = new javax.swing.JLabel();
         txtUser = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
+        clock = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         btnProduct1 = new javax.swing.JButton();
         btnProduct2 = new javax.swing.JButton();
@@ -100,10 +204,10 @@ public class SellingScreen extends javax.swing.JFrame {
         btnDelete = new javax.swing.JButton();
         btnQuantity = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
         txtTotal = new javax.swing.JTextField();
         lblTotal = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        orderText = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -137,7 +241,7 @@ public class SellingScreen extends javax.swing.JFrame {
 
         txtUser.setText("User");
 
-        jLabel1.setText("Date/Time");
+        clock.setText("Date/Time");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -152,7 +256,7 @@ public class SellingScreen extends javax.swing.JFrame {
                 .addComponent(btnAdmin)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton39)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 562, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(lblUser)
@@ -160,8 +264,8 @@ public class SellingScreen extends javax.swing.JFrame {
                         .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(25, 25, 25))))
+                        .addComponent(clock)
+                        .addGap(85, 85, 85))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -173,14 +277,19 @@ public class SellingScreen extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblUser)
                     .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(clock)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Buttons"));
 
         btnProduct1.setText("jButton1");
+        btnProduct1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProduct1ActionPerformed(evt);
+            }
+        });
 
         btnProduct2.setText("jButton2");
 
@@ -458,12 +567,14 @@ public class SellingScreen extends javax.swing.JFrame {
 
         btnCancel.setText("Cancel");
 
-        jScrollPane1.setViewportView(jTextPane1);
-
         txtTotal.setText("$0.00");
 
         lblTotal.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         lblTotal.setText("Total:");
+
+        orderText.setColumns(20);
+        orderText.setRows(5);
+        jScrollPane2.setViewportView(orderText);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -482,21 +593,21 @@ public class SellingScreen extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGap(0, 143, Short.MAX_VALUE)
                         .addComponent(lblTotal)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane2)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 323, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTotal))
@@ -564,10 +675,16 @@ public class SellingScreen extends javax.swing.JFrame {
        this.dispose();
     }//GEN-LAST:event_btnAdminActionPerformed
 
+    private void btnProduct1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProduct1ActionPerformed
+        // TODO add your handling code here:
+        orderText.append("Test");
+    }//GEN-LAST:event_btnProduct1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -647,16 +764,16 @@ public class SellingScreen extends javax.swing.JFrame {
     private javax.swing.JButton btnSelling;
     private javax.swing.JButton btnTender;
     private javax.swing.JButton btnTotal;
+    private javax.swing.JLabel clock;
     private javax.swing.JButton jButton21;
     private javax.swing.JButton jButton39;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextPane jTextPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblTotal;
     private javax.swing.JLabel lblUser;
+    private javax.swing.JTextArea orderText;
     private javax.swing.JTextField txtTotal;
     private javax.swing.JTextField txtUser;
     // End of variables declaration//GEN-END:variables

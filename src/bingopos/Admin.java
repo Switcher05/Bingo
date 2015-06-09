@@ -23,12 +23,32 @@
  */
 package bingopos;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Switcher
  */
 public class Admin extends javax.swing.JFrame {
 
+    Connection c;
+    Statement stmt;
+    ResultSet rs;
+    PreparedStatement pstmt;
+    public static int start = 620;
+
+    
+    private static java.sql.Timestamp getCurrentTimeStamp() {
+
+        java.util.Date today = new java.util.Date();
+        return new java.sql.Timestamp(today.getTime());
+    }
     /**
      * Creates new form Admin
      */
@@ -148,10 +168,20 @@ public class Admin extends javax.swing.JFrame {
         btnEndSession.setText("End Session");
 
         btnSessionStart.setText("Start Session");
+        btnSessionStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSessionStartActionPerformed(evt);
+            }
+        });
 
         btnVoid.setText("Void");
 
         btnReturn.setText("empty");
+        btnReturn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReturnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -265,6 +295,45 @@ public class Admin extends javax.swing.JFrame {
     private void btnAddCashActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddCashActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnAddCashActionPerformed
+
+    private void btnSessionStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSessionStartActionPerformed
+        // TODO add your handling code here:
+        try{
+        c = dbConnect.getConnection();
+        pstmt = c.prepareStatement("INSERT INTO `bingo`.`sessions` (`starting_cash`, `closing_cash`, `num_invoices`, `cash_diff`, `session_start`, `session_close`) VALUES (?, '0', '0', '0', ?, '2015-12-31')");
+        pstmt.setInt(1,start);
+        pstmt.setTimestamp(2, getCurrentTimeStamp());
+        pstmt.executeUpdate();
+       // rs.close();
+//        stmt.close();
+        c.close();
+        }catch(SQLException se){
+      //Handle errors for JDBC
+      se.printStackTrace();
+        }catch(Exception e){
+           //Handle errors for Class.forName
+           e.printStackTrace();
+        }finally{
+           //finally block used to close resources
+           try{
+                 if(stmt!=null)
+                    stmt.close();
+              }catch(SQLException se2){
+              }// nothing we can do
+              try{
+                 if(c!=null)
+                    c.close();
+              }catch(SQLException se){
+                 se.printStackTrace();
+              }//end finally try
+           }//end try
+           System.out.println("Goodbye!");
+    }//GEN-LAST:event_btnSessionStartActionPerformed
+
+    private void btnReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnActionPerformed
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_btnReturnActionPerformed
 
     /**
      * @param args the command line arguments

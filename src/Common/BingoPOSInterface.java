@@ -21,19 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package bingopos;
+package Common;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  *
  * @author Switcher
  */
-public class bingoProduct implements Product {
-    @Override
-    public String getProduct(){
-        return "6 face";
-    }
-    @Override
-    public String setProduct(){
-        return "12 face";
-    }
+public interface BingoPOSInterface extends Remote{
+    public String getDateTime() throws RemoteException;
+    public int createInvoice(int userID) throws RemoteException;
+    
 }
