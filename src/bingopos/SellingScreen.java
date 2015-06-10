@@ -24,6 +24,7 @@
 package bingopos;
 
 import Common.BingoPOSInterface;
+import Common.Order;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.Naming;
@@ -33,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.Timer;
 
@@ -53,11 +55,19 @@ public class SellingScreen extends javax.swing.JFrame {
     private String registryURL = "rmi://"+ hostname + ":" + RMIPort + "/pos";
     public static final int userID = 1;
     public int invNum = 0;
+    public ArrayList<Integer> prodID;
+    public String[] prodName;
+    public double[] prodPrice;
+    public double total = 0;
+    public String totalSt;
     /**
      * Creates new form SellingScreen
      */
     public SellingScreen() {
-        
+        super("Selling Screen");
+        this.prodID = new ArrayList();
+        prodName = new String[10];
+        prodPrice = new double[10];
         initComponents();
         loadButtons();
         
@@ -65,6 +75,8 @@ public class SellingScreen extends javax.swing.JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     tickTock();
+                    totalSt = Double.toString(total);
+                    txtTotal.setText(totalSt);
                 }
             });
         timer.setRepeats(true);
@@ -84,9 +96,9 @@ public class SellingScreen extends javax.swing.JFrame {
             
         }
 
-    public void actionPerformed(ActionEvent e){
-        String choice = e.getActionCommand();
-        if (choice == "1 Face Paper")
+    public void actionPerformed(ActionEvent evt){
+        String choice = evt.getActionCommand();
+        if (choice == "jButton1")
         {
             System.out.println("Test");
         }
@@ -103,37 +115,42 @@ public class SellingScreen extends javax.swing.JFrame {
             String sql1 = "SELECT * FROM product WHERE idproduct = 1";
             rs = stmt.executeQuery(sql1);
             while(rs.next()){
-                String button1 = rs.getString("name");
-                String button1prize = rs.getString("price");
-                btnProduct1.setText(button1 + button1prize);
+                prodID.add(rs.getInt("idproduct"));
+                prodName[0] = rs.getString("name");
+                prodPrice[0] = rs.getDouble("price");
+                btnProduct1.setText(prodName[0]);
             }
             String sql2 = "SELECT * FROM product WHERE idproduct = 2";
             rs = stmt.executeQuery(sql2);
             while(rs.next()){
-                String button2 = rs.getString("name");
-                String button2prize = rs.getString("price");
-                btnProduct2.setText(button2 + button2prize);
+                prodID.add(rs.getInt("idproduct"));
+                prodName[1] = rs.getString("name");
+                prodPrice[1] = rs.getDouble("price");
+                btnProduct2.setText(prodName[1]);
             }
             String sql3 = "SELECT * FROM product WHERE idproduct = 3";
             rs = stmt.executeQuery(sql3);
             while(rs.next()){
-                String button3 = rs.getString("name");
-                String button3prize = rs.getString("price");
-                btnProduct3.setText(button3 + button3prize);
+                prodID.add(rs.getInt("idproduct"));
+                prodName[2] = rs.getString("name");
+                prodPrice[2] = rs.getDouble("price");
+                btnProduct3.setText(prodName[2]);
             }
             String sql4 = "SELECT * FROM product WHERE idproduct = 4";
             rs = stmt.executeQuery(sql4);
             while(rs.next()){
-                String button4 = rs.getString("name");
-                String button4prize = rs.getString("price");
-                btnProduct4.setText(button4 + button4prize);
+                prodID.add(rs.getInt("idproduct"));
+                prodName[3] = rs.getString("name");
+                prodPrice[3] = rs.getDouble("price");
+                btnProduct4.setText(prodName[3]);
             }
             String sql5 = "SELECT * FROM product WHERE idproduct = 5";
             rs = stmt.executeQuery(sql5);
             while(rs.next()){
-                String button5 = rs.getString("name");
-                String button5prize = rs.getString("price");
-                btnProduct5.setText(button5 + button5prize);
+                prodID.add(rs.getInt("idproduct"));
+                prodName[4] = rs.getString("name");
+                prodPrice[4] = rs.getDouble("price");
+                btnProduct5.setText(prodName[4]);
             }
             
             
@@ -292,10 +309,25 @@ public class SellingScreen extends javax.swing.JFrame {
         });
 
         btnProduct2.setText("jButton2");
+        btnProduct2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProduct2ActionPerformed(evt);
+            }
+        });
 
         btnProduct3.setText("jButton3");
+        btnProduct3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProduct3ActionPerformed(evt);
+            }
+        });
 
         btnProduct4.setText("jButton4");
+        btnProduct4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProduct4ActionPerformed(evt);
+            }
+        });
 
         btnProduct5.setText("jButton5");
 
@@ -666,7 +698,7 @@ public class SellingScreen extends javax.swing.JFrame {
     }//GEN-LAST:event_btnPaymasterActionPerformed
 
     private void btnTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTotalActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here: create new invoice number on total
     }//GEN-LAST:event_btnTotalActionPerformed
 
     private void btnAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdminActionPerformed
@@ -677,8 +709,80 @@ public class SellingScreen extends javax.swing.JFrame {
 
     private void btnProduct1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProduct1ActionPerformed
         // TODO add your handling code here:
-        orderText.append("Test");
+        Order o = new Order();
+        o.type = Order.SELL;
+        o.idproduct = prodID.get(0);
+        o.name = prodName[0];
+        o.price = prodPrice[0];
+        o.invoiceNum = invNum;
+        o.qty = 1;
+        try{
+            BingoPOSInterface pos = (BingoPOSInterface)Naming.lookup(registryURL);
+            pos.sellItem(o);
+        }catch (Exception ex) {
+            System.out.println("Error selling item" + ex);
+            
+        }
+        orderText.append("1" + "---- " + prodName[0] + "-----@$" + prodPrice[0] +"\n");
+        total = total + prodPrice[0];
     }//GEN-LAST:event_btnProduct1ActionPerformed
+
+    private void btnProduct2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProduct2ActionPerformed
+        Order o = new Order();
+        o.type = Order.SELL;
+        o.idproduct = prodID.get(1);
+        o.name = prodName[1];
+        o.price = prodPrice[1];
+        o.invoiceNum = invNum;
+        o.qty = 1;
+        try{
+            BingoPOSInterface pos = (BingoPOSInterface)Naming.lookup(registryURL);
+            pos.sellItem(o);
+        }catch (Exception ex) {
+            System.out.println("Error selling item" + ex);
+            
+        }
+        orderText.append("1" + "---- " + prodName[1] + "-----@$" + prodPrice[1] +"\n");
+        total = total + prodPrice[1];
+    }//GEN-LAST:event_btnProduct2ActionPerformed
+
+    private void btnProduct3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProduct3ActionPerformed
+        Order o = new Order();
+        o.type = Order.SELL;
+        o.idproduct = prodID.get(2);
+        o.name = prodName[2];
+        o.price = prodPrice[2];
+        o.invoiceNum = invNum;
+        o.qty = 1;
+        try{
+            BingoPOSInterface pos = (BingoPOSInterface)Naming.lookup(registryURL);
+            pos.sellItem(o);
+        }catch (Exception ex) {
+            System.out.println("Error selling item" + ex);
+            
+        }
+        orderText.append("1" + "---- " + prodName[2] + "-----@$" + prodPrice[2] +"\n");
+        total = total + prodPrice[2];
+    }//GEN-LAST:event_btnProduct3ActionPerformed
+
+    private void btnProduct4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProduct4ActionPerformed
+        Order o = new Order();
+        o.type = Order.SELL;
+        o.idproduct = prodID.get(3);
+        o.name = prodName[3];
+        o.price = prodPrice[3];
+        o.invoiceNum = invNum;
+        o.qty = 1;
+        try{
+            BingoPOSInterface pos = (BingoPOSInterface)Naming.lookup(registryURL);
+            pos.sellItem(o);
+        }catch (Exception ex) {
+            System.out.println("Error selling item" + ex);
+            
+        }
+        orderText.append("1" + "---- " + prodName[3] + "-----@$" + prodPrice[3] +"\n");
+        total = total + prodPrice[3];
+    }//GEN-LAST:event_btnProduct4ActionPerformed
 
     /**
      * @param args the command line arguments

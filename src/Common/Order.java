@@ -31,15 +31,16 @@ import java.io.Serializable;
  */
 public class Order implements Serializable{
     public static final long serialVersionUID = 1L;
-    final static int SELL = 1;
-    final static int DELETE = 2;
-    final static int SUCESS = 3;
+    public final static int SELL = 1;
+    public final static int DELETE = 2;
+    public final static int SUCESS = 3;
     
     public int type;
     public String result;
     public int idproduct;
     public String name;
     public double price;
+    public int invoiceNum;
     public int qty;
     
     

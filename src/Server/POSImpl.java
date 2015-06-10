@@ -49,13 +49,16 @@ import java.util.logging.Logger;
 
 public class POSImpl extends UnicastRemoteObject implements BingoPOSInterface{
     
+    private static final long serialVersionUID = 1L;
     Connection c;
     PreparedStatement pstm;
     ResultSet rs;
+    List<Order> orderList = new ArrayList();
     private int invNum = 0;
+    
     public POSImpl() throws RemoteException{
         super();
-        List<Order> order = new ArrayList();
+        
     }
 
     /**
@@ -138,10 +141,68 @@ public class POSImpl extends UnicastRemoteObject implements BingoPOSInterface{
     }
         return invNum;
     }
-    public synchronized void sellItem(int prodId, double price, int qty){
+    public synchronized void sellItem(Order o) throws RemoteException{
         //if prod id same then increae qty
-        
+        Order reply = new Order();
+        Order copyOrder = new Order();
+        copyit(copyOrder, o);
+        orderList.add(copyOrder);
+        System.out.println("Testing of copied order: " + copyOrder.name);
+        PreparedStatement addItem = null;
+        String addItemSt = "INSERT INTO orders (cost,date,order_qty, product_idproduct, invnum) VALUES(?,?,?,?,?)";
+        try{
+            try {
+                c = dbConnect.getConnection();
+            } catch (Exception ex) {
+                Logger.getLogger(POSImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            addItem = c.prepareStatement(addItemSt);
+            c.setAutoCommit(false);
+            addItem.setDouble(1, copyOrder.price);
+            addItem.setTimestamp(2, getCurrentTimeStamp());
+            addItem.setInt(3, copyOrder.qty);
+            addItem.setInt(4, copyOrder.idproduct);
+            addItem.setInt(5, copyOrder.invoiceNum);
+            addItem.executeUpdate();
+            System.out.println("Item sold!");
+            c.commit();
+        }catch(SQLException e){
+            if(c != null){
+                System.err.print("Transaction is being rolled back");
+                try {
+                    c.rollback();
+                } catch (SQLException ex) {
+                    Logger.getLogger(POSImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+                
+        } finally{
+            if(addItem != null){
+                try {
+                    addItem.close();
+                    c.setAutoCommit(true);
+                } catch (SQLException ex) {
+                    Logger.getLogger(POSImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            }
+        }
         
     }
     
+    /**
+     *  Copies the order message into a new message due to object restraints
+     * @param Onew  New copy of Order()
+     * @param Oold  Old copy of Order()
+     * @throws java.rmi.RemoteException
+     */
+    public synchronized void copyit(Order Onew, Order Oold)throws RemoteException{
+        Onew.idproduct = Oold.idproduct;
+        Onew.name = Oold.name;
+        Onew.price = Oold.price;
+        Onew.qty = Oold.qty;
+        Onew.result = Oold.result;
+        Onew.type = Oold.type;
+        Onew.invoiceNum = Oold.invoiceNum;
+    }
 }

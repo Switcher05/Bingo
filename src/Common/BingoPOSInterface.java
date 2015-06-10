@@ -33,5 +33,7 @@ import java.rmi.RemoteException;
 public interface BingoPOSInterface extends Remote{
     public String getDateTime() throws RemoteException;
     public int createInvoice(int userID) throws RemoteException;
+    public void sellItem(Order o) throws RemoteException;
+    public void copyit(Order Onew, Order Oold) throws RemoteException;
     
 }
